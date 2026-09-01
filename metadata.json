@@ -1,0 +1,6 @@
+{
+  "name": "Quản Lý Affiliate Mẹ & Bé",
+  "description": "Ứng dụng quản lý sản phẩm affiliate mẹ và bé với phân tích insight khách hàng bằng AI, tạo viral hook mở đầu video và quản lý kịch bản cảnh quay.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

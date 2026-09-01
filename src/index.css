@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --font-scale: 100%;
+}
+
+html {
+  font-size: var(--font-scale, 100%);
+  transition: font-size 0.15s ease-out;
+  background-color: #0B1120;
+  color: #F1F5F9;
+  color-scheme: dark;
+}
+
+html.dark, html {
+  background-color: #0B1120;
+  color: #F1F5F9;
+}
+
+body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: #0B1120;
+  color: #F1F5F9;
+  min-height: 100vh;
+}
+
+/* Smooth soothing scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
