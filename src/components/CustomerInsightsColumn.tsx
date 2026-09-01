@@ -133,7 +133,7 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
         },
       });
 
-      const textResult = response.text();
+      const textResult = response.text || '';
       if (!textResult) {
         throw new Error('AI không trả về kết quả.');
       }
