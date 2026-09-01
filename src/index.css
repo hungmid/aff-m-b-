@@ -6,44 +6,63 @@
   --font-scale: 100%;
 }
 
+/* --- GIAO DIỆN SÁNG (LIGHT MODE) - Dịu mắt, chống chói --- */
 html {
   font-size: var(--font-scale, 100%);
   transition: font-size 0.15s ease-out;
-  background-color: #0B1120;
-  color: #F1F5F9;
-  color-scheme: dark;
-}
-
-html.dark, html {
-  background-color: #0B1120;
-  color: #F1F5F9;
+  background-color: #F8FAFC; /* Nền xám nhạt dịu nhẹ, không trắng gắt */
+  color: #1E293B; /* Chữ xanh đậm rõ nét, không dùng đen tuyền */
+  color-scheme: light;
 }
 
 body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  background-color: #0B1120;
-  color: #F1F5F9;
+  background-color: #F8FAFC;
+  color: #1E293B;
   min-height: 100vh;
 }
 
-/* Smooth soothing scrollbar */
+/* --- GIAO DIỆN TỐI (DARK MODE) - Tối sâu nhưng dịu, không gắt --- */
+html.dark {
+  background-color: #0F172A; /* Nền tối sâu sang trọng nhưng êm mắt */
+  color: #E2E8F0; /* Chữ sáng dịu, giảm độ tương phản chói */
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0F172A;
+  color: #E2E8F0;
+}
+
+/* --- THANH CUỘN MỀM MẠI CHO CẢ 2 CHẾ ĐỘ --- */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0F172A;
+  background: #F1F5F9;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1E293B;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+html.dark ::-webkit-scrollbar-thumb {
   background: #475569;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
