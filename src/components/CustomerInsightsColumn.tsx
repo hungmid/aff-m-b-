@@ -77,22 +77,23 @@ export const CustomerInsightsColumn: React.FC<CustomerInsightsColumnProps> = ({
       let apiKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('GEMINI_API_KEY') || '';
       
       if (!apiKey) {
-        apiKey = prompt('Chưa tìm thấy API Key. Vui lòng nhập Google Gemini API Key của bạn vào đây:') || '';
-        if (apiKey.trim()) {
-          localStorage.setItem('GEMINI_API_KEY', apiKey.trim());
+        const userKey = window.prompt('Chưa tìm thấy API Key. Vui lòng nhập Google Gemini API Key của bạn vào đây:');
+        if (userKey && userKey.trim()) {
+          apiKey = userKey.trim();
+          localStorage.setItem('GEMINI_API_KEY', apiKey);
         } else {
           throw new Error('Chưa có API Key của Gemini.');
         }
       }
 
-      const ai = new GoogleGenAI({ apiKey });
+      const googleAi = new GoogleGenAI({ apiKey });
       const categoryName = CATEGORIES[product.category]?.name || 'Trang trí nhà cửa';
       
       const existingText = isLoadMore && insights.length > 0 
         ? `Các insight đã có (hãy tạo các góc nhìn KHÁC biệt hoàn toàn):\n` + insights.map(i => `- ${i.angle}: ${i.viralHook}`).join('\n')
         : '';
 
-      const prompt = `Bạn là chuyên gia marketing và sáng tạo nội dung TikTok/Reels triệu view. Hãy phân tích sản phẩm sau và tạo ra 10 insight khách hàng kèm theo câu Viral Hook mở đầu video cực kỳ thu hút.
+      const promptText = `Bạn là chuyên gia marketing và sáng tạo nội dung TikTok/Reels triệu view. Hãy phân tích sản phẩm sau và tạo ra 10 insight khách hàng kèm theo câu Viral Hook mở đầu video cực kỳ thu hút.
 
 Thông tin sản phẩm:
 - Tên sản phẩm: ${product.name}
@@ -109,9 +110,9 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
 - viralHook: câu hook mở đầu video trong 3-5 giây đầu tiên gây chú ý mạnh
 - scriptIdea: gợi ý ngắn gọn cách triển khai cảnh quay tiếp theo`;
 
-      const response = await ai.models.generateContent({
+      const response = await googleAi.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: prompt,
+        contents: promptText,
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
