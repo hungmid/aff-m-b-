@@ -11,8 +11,7 @@ import {
   Share2, 
   Edit3, 
   AlertCircle, 
-  Flame,
-  ArrowRight
+  Flame
 } from 'lucide-react';
 import { Product, CustomerInsight, CATEGORIES } from '../types';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -26,7 +25,6 @@ interface CustomerInsightsColumnProps {
 export const CustomerInsightsColumn: React.FC<CustomerInsightsColumnProps> = ({
   product,
   onUpdateProduct,
-  onSelectInsightForShots,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -424,12 +422,32 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
 
                 {isEditing ? (
                   <div className="space-y-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 text-xs">
-                    <input type="text" value={editForm.angle || ''} onChange={(e) => setEditForm({ ...editForm, angle: e.target.value })} className="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 rounded-lg text-xs" />
-                    <input type="text" value={editForm.viralHook || ''} onChange={(e) => setEditForm({ ...editForm, viralHook: e.target.value })} className="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-rose-200 rounded-lg text-xs font-semibold text-rose-600" />
-                    <textarea rows={2} value={editForm.painPoint || ''} onChange={(e) => setEditForm({ ...editForm, painPoint: e.target.value })} className="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 rounded-lg text-xs" />
-                    <textarea rows={2} value={editForm.benefit || ''} onChange={(e) => setEditForm({ ...editForm, benefit: e.target.value })} className="w-full px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 rounded-lg text-xs" />
+                    <input 
+                      type="text" 
+                      value={editForm.angle || ''} 
+                      onChange={(e) => setEditForm({ ...editForm, angle: e.target.value })} 
+                      className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500" 
+                    />
+                    <input 
+                      type="text" 
+                      value={editForm.viralHook || ''} 
+                      onChange={(e) => setEditForm({ ...editForm, viralHook: e.target.value })} 
+                      className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 text-rose-600 dark:text-rose-300 border border-rose-300 dark:border-rose-700 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500" 
+                    />
+                    <textarea 
+                      rows={2} 
+                      value={editForm.painPoint || ''} 
+                      onChange={(e) => setEditForm({ ...editForm, painPoint: e.target.value })} 
+                      className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-rose-500" 
+                    />
+                    <textarea 
+                      rows={2} 
+                      value={editForm.benefit || ''} 
+                      onChange={(e) => setEditForm({ ...editForm, benefit: e.target.value })} 
+                      className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-rose-500" 
+                    />
                     <div className="flex justify-end gap-1.5 pt-1">
-                      <button onClick={() => setEditingInsightId(null)} className="px-2.5 py-1 bg-slate-200 rounded-lg text-xs">Hủy</button>
+                      <button onClick={() => setEditingInsightId(null)} className="px-2.5 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs">Hủy</button>
                       <button onClick={handleSaveEdit} className="px-3 py-1 bg-rose-500 text-white rounded-lg text-xs font-semibold">Lưu</button>
                     </div>
                   </div>
@@ -444,7 +462,7 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
                         <button
                           onClick={() => handleCopyHook(ins.viralHook, ins.id)}
                           className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 ${
-                            isCopied ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 text-rose-700 border border-rose-200'
+                            isCopied ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-700'
                           }`}
                         >
                           {isCopied ? <><Check className="w-3 h-3" /><span>Copied!</span></> : <><Copy className="w-3 h-3" /><span>Copy Hook</span></>}
@@ -465,24 +483,12 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
                         <span className="text-[12px] leading-relaxed">{ins.benefit}</span>
                       </div>
                       {ins.scriptIdea && (
-                        <div className="flex items-start gap-1.5 text-slate-500 pt-1.5 border-t border-slate-100 dark:border-slate-700">
+                        <div className="flex items-start gap-1.5 text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-700">
                           <span className="text-amber-600 shrink-0 font-bold text-[11px]">🎬 Gợi ý:</span>
                           <span className="text-[11px] italic">{ins.scriptIdea}</span>
                         </div>
                       )}
                     </div>
-
-                    {onSelectInsightForShots && (
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          onClick={() => onSelectInsightForShots(ins)}
-                          className="text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950 px-2.5 py-1 rounded-lg border border-rose-200 flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Lên cảnh quay video theo hook này</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -492,10 +498,10 @@ Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (arr
       </div>
 
       {/* Footer */}
-      <div className="p-2.5 bg-slate-50/80 dark:bg-slate-900 border-t border-slate-200 text-center text-xs text-slate-500 flex items-center justify-between shrink-0">
+      <div className="p-2.5 bg-slate-50/80 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 flex items-center justify-between shrink-0">
         <span>Tổng cộng: <strong className="text-slate-800 dark:text-slate-200">{insights.length}</strong> insight</span>
         {insights.length > 0 && (
-          <button onClick={() => handleGenerateInsights(true)} disabled={isGenerating} className="text-xs text-rose-600 hover:underline flex items-center gap-1 cursor-pointer">
+          <button onClick={() => handleGenerateInsights(true)} disabled={isGenerating} className="text-xs text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer">
             <Plus className="w-3 h-3" />
             <span>Tạo thêm 10 insight</span>
           </button>
