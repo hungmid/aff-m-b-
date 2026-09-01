@@ -83,7 +83,9 @@ export const VideoShotsColumn: React.FC<VideoShotsColumnProps> = ({
       const googleAi = new GoogleGenAI({ apiKey });
       const targetInsight = selectedInsight || product.insights[0];
 
-      const promptText = `Bạn là đạo diễn sản xuất video TikTok/Reels triệu view chuyên nghiệp. Dựa vào thông tin sản phẩm và Hook dưới đây, hãy thiết kế một kịch bản cảnh quay B-roll chi tiết (khoảng 5-7 cảnh quay) để dựng video hoàn chỉnh.
+      const promptText = `Bạn là đạo diễn sản xuất video TikTok/Reels triệu view chuyên nghiệp. Người sáng tạo nội dung (reviewer/affiliate marketer) trực tiếp xuất hiện trong video là MỘT ÔNG BỐ trẻ tuổi. Dựa vào thông tin sản phẩm và Hook dưới đây, hãy thiết kế một kịch bản cảnh quay B-roll chi tiết (khoảng 5-7 cảnh quay) để ông bố dựng video hoàn chỉnh.
+
+Lưu ý quan trọng về nhân vật: Toàn bộ mô tả hành động, góc máy phải hướng về **ông bố** (ví dụ: bố cầm sản phẩm, ông bố review, ông bố chia sẻ kinh nghiệm chăm con), tuyệt đối không dùng từ "mẹ" hay "bà mẹ".
 
 Thông tin sản phẩm:
 - Tên sản phẩm: ${product.name}
@@ -98,10 +100,10 @@ Insight & Viral Hook được chọn làm gốc:
 Yêu cầu trả về đúng định dạng JSON chuẩn gồm một mảng (array) các đối tượng cảnh quay, mỗi đối tượng gồm:
 - id: chuỗi định danh duy nhất (ví dụ: "shot_1", "shot_2"...)
 - title: tên ngắn gọn của cảnh (VD: "Mở đầu gây chú ý", "Cận cảnh chi tiết", "Trải nghiệm thực tế"...)
-- visualDescription: mô tả hình ảnh cảnh quay cần thực hiện chi tiết, sinh động
+- visualDescription: mô tả hình ảnh cảnh quay ông bố thực hiện chi tiết, sinh động
 - cameraAngle: góc máy (VD: "Góc cận (Close-up)", "Góc rộng (Wide)", "POV góc nhìn người dùng", "Top-down từ trên xuống")
 - duration: thời lượng dự kiến (VD: "3s", "4s", "5s")
-- audioNote: ghi chú âm thanh / voiceover / nhạc nền cho cảnh đó`;
+- audioNote: ghi chú âm thanh / voiceover / nhạc nền cho cảnh đó (giọng đọc của nam/bố)`;
 
       const response = await googleAi.models.generateContent({
         model: 'gemini-2.5-flash',
