@@ -74,10 +74,15 @@ export const CustomerInsightsColumn: React.FC<CustomerInsightsColumnProps> = ({
     setErrorMessage(null);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('GEMINI_API_KEY') || '';
+      let apiKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('GEMINI_API_KEY') || '';
       
       if (!apiKey) {
-        throw new Error('Chưa có API Key của Gemini. Vui lòng thiết lập biến môi trường VITE_GEMINI_API_KEY.');
+        apiKey = prompt('Chưa tìm thấy API Key. Vui lòng nhập Google Gemini API Key của bạn vào đây:') || '';
+        if (apiKey.trim()) {
+          localStorage.setItem('GEMINI_API_KEY', apiKey.trim());
+        } else {
+          throw new Error('Chưa có API Key của Gemini.');
+        }
       }
 
       const ai = new GoogleGenAI({ apiKey });
