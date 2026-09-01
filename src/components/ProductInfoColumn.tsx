@@ -434,7 +434,6 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
               )}
             </div>
           ) : (
-            {/* Empty State Dropzone */}
             <div
               onDragOver={(e) => {
                 e.preventDefault();
