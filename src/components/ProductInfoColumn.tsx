@@ -1,23 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { 
   FileText, 
-  Sparkles, 
   ExternalLink, 
   Upload, 
   DollarSign, 
   Percent, 
-  Tag, 
   CheckCircle2, 
   AlertCircle,
-  Link,
-  Plus,
   X,
-  Package,
-  Layers,
   Image as ImageIcon,
-  ShoppingBag,
   Video,
-  Trash2,
   Star
 } from 'lucide-react';
 import { Product, CategoryType, CATEGORIES } from '../types';
@@ -32,9 +24,7 @@ interface ProductInfoColumnProps {
 export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
   product,
   onUpdateProduct,
-  onGenerateInsightShortcut,
 }) => {
-  const [newTagInput, setNewTagInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredImage, setHoveredImage] = useState<{ url: string; index: number } | null>(null);
@@ -55,9 +45,6 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
     );
   }
 
-  const categoryMeta = CATEGORIES[product.category] || CATEGORIES['mom-essentials'];
-
-  // Current images array (fallback to imageUrl if present)
   const currentImages: string[] = product.images && product.images.length > 0
     ? product.images
     : (product.imageUrl ? [product.imageUrl] : []);
@@ -95,7 +82,7 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
         onUpdateProduct({
           ...product,
           images: updatedImages,
-          imageUrl: updatedImages[0] || '', // keep primary synced
+          imageUrl: updatedImages[0] || '',
           updatedAt: new Date().toISOString(),
         });
       }
@@ -130,20 +117,6 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
       imageUrl: target,
       updatedAt: new Date().toISOString(),
     });
-  };
-
-  const handleAddHighlight = () => {
-    if (!newTagInput.trim()) return;
-    const current = product.highlights || [];
-    if (!current.includes(newTagInput.trim())) {
-      handleChange('highlights', [...current, newTagInput.trim()]);
-    }
-    setNewTagInput('');
-  };
-
-  const handleRemoveHighlight = (tagToRemove: string) => {
-    const current = product.highlights || [];
-    handleChange('highlights', current.filter((t) => t !== tagToRemove));
   };
 
   const hasEnoughInfoForInsights = Boolean(
@@ -373,6 +346,7 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
             }`}>
               {currentImages.length}/5 ảnh
             </span>
+
           </div>
 
           {/* Hidden File Input */}
@@ -460,7 +434,7 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
               )}
             </div>
           ) : (
-            /* Empty State Dropzone */
+            {/* Empty State Dropzone */}
             <div
               onDragOver={(e) => {
                 e.preventDefault();
@@ -572,91 +546,7 @@ export const ProductInfoColumn: React.FC<ProductInfoColumnProps> = ({
           )}
         </div>
 
-        {/* Feature Highlights Tags */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-            Điểm nhấn nổi bật (Tags / Selling Points)
-          </label>
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {(product.highlights || []).map((tag, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200/80 dark:bg-rose-950/70 dark:border-rose-800/70 dark:text-rose-200 text-xs font-medium"
-              >
-                <span>{tag}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveHighlight(tag)}
-                  className="p-0.5 hover:bg-rose-200/80 dark:hover:bg-rose-900 rounded-full text-rose-600 dark:text-rose-300 cursor-pointer"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newTagInput}
-              onChange={(e) => setNewTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddHighlight();
-                }
-              }}
-              placeholder="VD: Không dây rảnh tay, Sợi tre mát lạnh..."
-              className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-300/60"
-            />
-            <button
-              type="button"
-              onClick={handleAddHighlight}
-              className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-300 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-            >
-              <Plus className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
-              <span>Thêm tag</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Creator Notes */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-            Ghi chú riêng cho Creator (Ý tưởng, trend, nguồn hàng...)
-          </label>
-          <textarea
-            rows={2}
-            value={product.notes || ''}
-            onChange={(e) => handleChange('notes', e.target.value)}
-            placeholder="Ghi chú cá nhân về sản phẩm này..."
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-300/60 transition-all shadow-2xs"
-          />
-        </div>
-
       </div>
-
-      {/* Footer shortcut to AI Generator */}
-      <div className="p-2.5 bg-slate-50/80 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-          Cột 3: {product.insights?.length || 0} Insights đã tạo
-        </span>
-
-        <button
-          onClick={onGenerateInsightShortcut}
-          disabled={!hasEnoughInfoForInsights}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
-            hasEnoughInfoForInsights
-              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-200 dark:shadow-none active:scale-95'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed shadow-none'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Sang Cột Insight AI →</span>
-        </button>
-      </div>
-
     </div>
   );
 };
-
