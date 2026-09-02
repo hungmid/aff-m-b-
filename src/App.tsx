@@ -23,35 +23,39 @@ import { BackupModal } from './components/BackupModal';
 import { HelpModal } from './components/HelpModal';
 
 export default function App() {
-  // 1. Tải trước từ bộ nhớ cục bộ (localStorage) để hiển thị ngay lập tức
   const [products, setProducts] = useState<Product[]>(() => loadProductsFromStorage());
   const [activeProductId, setActiveProductId] = useState<string | null>(() => {
     const initialProds = loadProductsFromStorage();
     return loadActiveProductId(initialProds[0]?.id);
   });
 
-  // 2. Đồng thời tải ngầm từ Supabase về để cập nhật dữ liệu mới nhất từ thiết bị khác
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
+  const [sortOption, setSortOption] = useState<SortOption>('time_desc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedInsightForShots, setSelectedInsightForShots] = useState<CustomerInsight | null>(null);
+
+  // Đồng bộ dữ liệu từ Supabase về khi khởi động ứng dụng
   useEffect(() => {
     const syncFromCloud = async () => {
       const { data, error } = await supabase.from('products').select('*');
       if (!error && data && data.length > 0) {
         const cloudProducts: Product[] = data.map((item: any) => ({
-          id: item.id.toString(),
+          id: item.id,
           name: item.title || '',
           category: item.category || 'mom-essentials',
           price: item.price || '',
-          originalPrice: item.originalPrice || '',
+          originalPrice: item.original_price || '',
           affiliateUrl: item.affiliate_link || '',
-          commissionRate: item.commissionRate || '',
+          commissionRate: item.commission_rate || '',
           imageUrl: item.image_url || '',
           info: item.info || '',
-          targetAudience: item.targetAudience || '',
+          targetAudience: item.target_audience || '',
           highlights: item.highlights || [],
           notes: item.notes || '',
           insights: item.insights || [],
           shots: item.shots || [],
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString(),
+          createdAt: item.created_at || new Date().toISOString(),
+          updatedAt: item.updated_at || new Date().toISOString(),
         }));
         setProducts(cloudProducts);
       }
@@ -59,27 +63,11 @@ export default function App() {
     syncFromCloud();
   }, []);
 
-  // 3. Tự động lưu cục bộ mỗi khi danh sách thay đổi
-  useEffect(() => {
-    saveProductsToStorage(products);
-  }, [products]);
-
-  useEffect(() => {
-    if (activeProductId) {
-      saveActiveProductId(activeProductId);
-    }
-  }, [activeProductId]);
-
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
-  const [sortOption, setSortOption] = useState<SortOption>('time_desc');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedInsightForShots, setSelectedInsightForShots] = useState<CustomerInsight | null>(null);
-
-  // Theme & Font scale states...
+  // Theme & Font Scale settings
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('mom_baby_theme_v3');
-      return (saved === 'dark' || saved === 'light') ? saved : 'dark';
+      return saved === 'light' ? 'light' : 'dark';
     } catch {
       return 'dark';
     }
@@ -91,7 +79,9 @@ export default function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    try { localStorage.setItem('mom_baby_theme_v3', theme); } catch {}
+    try {
+      localStorage.setItem('mom_baby_theme_v3', theme);
+    } catch {}
   }, [theme]);
 
   const [fontScale, setFontScale] = useState<number>(() => {
@@ -105,7 +95,9 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-scale', `${fontScale}%`);
-    try { localStorage.setItem('mom_baby_font_scale', fontScale.toString()); } catch {}
+    try {
+      localStorage.setItem('mom_baby_font_scale', fontScale.toString());
+    } catch {}
   }, [fontScale]);
 
   const [activeMobileColumn, setActiveMobileColumn] = useState<number>(1);
@@ -115,6 +107,16 @@ export default function App() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isExportScriptModalOpen, setIsExportScriptModalOpen] = useState(false);
+
+  useEffect(() => {
+    saveProductsToStorage(products);
+  }, [products]);
+
+  useEffect(() => {
+    if (activeProductId) {
+      saveActiveProductId(activeProductId);
+    }
+  }, [activeProductId]);
 
   const activeProduct = products.find((p) => p.id === activeProductId) || products[0] || null;
 
@@ -126,33 +128,37 @@ export default function App() {
     }
   };
 
-  // Cập nhật sản phẩm: Lưu cục bộ + Đẩy lên Supabase
+  // Cập nhật sản phẩm đồng thời lên Supabase
   const handleUpdateProduct = async (updated: Product) => {
-    setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updated.id ? updated : p))
+    );
 
-    await supabase.from('products').update({
+    await supabase.from('products').upsert({
+      id: updated.id,
       title: updated.name,
+      category: updated.category,
       price: updated.price,
+      original_price: updated.originalPrice,
       affiliate_link: updated.affiliateUrl,
+      commission_rate: updated.commissionRate,
       image_url: updated.imageUrl,
+      info: updated.info,
+      target_audience: updated.targetAudience,
+      highlights: updated.highlights,
       notes: updated.notes,
-    }).eq('id', updated.id);
+      insights: updated.insights,
+      shots: updated.shots,
+      created_at: updated.createdAt,
+      updated_at: new Date().toISOString(),
+    });
   };
 
-  // Thêm sản phẩm mới: Lưu cục bộ + Đẩy lên Supabase
+  // Thêm sản phẩm mới đồng thời đẩy lên Supabase
   const handleAddProduct = async (productData: Partial<Product>) => {
-    const newProductPayload = {
-      title: productData.name || 'Sản phẩm mới',
-      price: productData.price || '',
-      affiliate_link: productData.affiliateUrl || '',
-      image_url: productData.imageUrl || '',
-      notes: productData.notes || '',
-    };
-
-    const { data, error } = await supabase.from('products').insert([newProductPayload]).select();
-
+    const newId = `prod_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const newProduct: Product = {
-      id: data && data[0] ? data[0].id.toString() : `prod_${Date.now()}`,
+      id: newId,
       name: productData.name || 'Sản phẩm mới',
       category: productData.category || 'mom-essentials',
       price: productData.price || '',
@@ -177,9 +183,28 @@ export default function App() {
     if (window.innerWidth < 1024) {
       setActiveMobileColumn(2);
     }
+
+    await supabase.from('products').insert({
+      id: newProduct.id,
+      title: newProduct.name,
+      category: newProduct.category,
+      price: newProduct.price,
+      original_price: newProduct.originalPrice,
+      affiliate_link: newProduct.affiliateUrl,
+      commission_rate: newProduct.commissionRate,
+      image_url: newProduct.imageUrl,
+      info: newProduct.info,
+      target_audience: newProduct.targetAudience,
+      highlights: newProduct.highlights,
+      notes: newProduct.notes,
+      insights: newProduct.insights,
+      shots: newProduct.shots,
+      created_at: newProduct.createdAt,
+      updated_at: newProduct.updatedAt,
+    });
   };
 
-  // Xóa sản phẩm: Xóa cục bộ + Xóa trên Supabase
+  // Xóa sản phẩm trên cả cục bộ lẫn Supabase
   const handleDeleteProduct = async (id: string) => {
     setProducts((prev) => {
       const next = prev.filter((p) => p.id !== id);
@@ -193,13 +218,20 @@ export default function App() {
   };
 
   const handleDuplicateProduct = (prod: Product) => {
-    handleAddProduct(prod);
+    handleAddProduct({
+      ...prod,
+      name: `${prod.name} (Bản sao)`
+    });
   };
 
-  const handleRestoreProducts = (restored: Product[]) => {
+  const handleRestoreProducts = async (restored: Product[]) => {
     setProducts(restored);
     if (restored.length > 0) {
       setActiveProductId(restored[0].id);
+    }
+    // Ghi đè toàn bộ lên cloud nếu dùng tính năng khôi phục
+    for (const item of restored) {
+      await handleUpdateProduct(item);
     }
   };
 
@@ -229,20 +261,43 @@ export default function App() {
         onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       />
 
-      {/* Mobile Tabs */}
       <div className="xl:hidden bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 px-3 py-1.5 shrink-0 z-20">
         <div className="grid grid-cols-4 gap-1.5 max-w-lg mx-auto text-xs">
-          <button onClick={() => setActiveMobileColumn(1)} className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 ${activeMobileColumn === 1 ? 'bg-rose-500 text-white' : 'text-slate-400'}`}>
-            <span>1</span> S.Phẩm
+          <button
+            onClick={() => setActiveMobileColumn(1)}
+            className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              activeMobileColumn === 1 ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">1</span>
+            <span>Danh Sách</span>
           </button>
-          <button onClick={() => setActiveMobileColumn(2)} className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 ${activeMobileColumn === 2 ? 'bg-rose-500 text-white' : 'text-slate-400'}`}>
-            <span>2</span> Chi Tiết
+          <button
+            onClick={() => setActiveMobileColumn(2)}
+            className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              activeMobileColumn === 2 ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">2</span>
+            <span>Thông Tin</span>
           </button>
-          <button onClick={() => setActiveMobileColumn(3)} className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 ${activeMobileColumn === 3 ? 'bg-rose-500 text-white' : 'text-slate-400'}`}>
-            <span>3</span> Insight
+          <button
+            onClick={() => setActiveMobileColumn(3)}
+            className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              activeMobileColumn === 3 ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">3</span>
+            <span>Insight AI</span>
           </button>
-          <button onClick={() => setActiveMobileColumn(4)} className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 ${activeMobileColumn === 4 ? 'bg-rose-500 text-white' : 'text-slate-400'}`}>
-            <span>4</span> Quay
+          <button
+            onClick={() => setActiveMobileColumn(4)}
+            className={`py-1.5 px-2 rounded-xl font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+              activeMobileColumn === 4 ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">4</span>
+            <span>Cảnh Quay</span>
           </button>
         </div>
       </div>
@@ -265,6 +320,7 @@ export default function App() {
               onSearchChange={setSearchTerm}
             />
           </div>
+
           <div className={`${activeMobileColumn === 2 ? 'block' : 'hidden xl:block'} h-full min-h-[500px] xl:min-h-0`}>
             <ProductInfoColumn
               product={activeProduct}
@@ -272,6 +328,7 @@ export default function App() {
               onGenerateInsightShortcut={() => setActiveMobileColumn(3)}
             />
           </div>
+
           <div className={`${activeMobileColumn === 3 ? 'block' : 'hidden xl:block'} h-full min-h-[500px] xl:min-h-0`}>
             <CustomerInsightsColumn
               product={activeProduct}
@@ -279,6 +336,7 @@ export default function App() {
               onSelectInsightForShots={handleSelectInsightForShots}
             />
           </div>
+
           <div className={`${activeMobileColumn === 4 ? 'block' : 'hidden xl:block'} h-full min-h-[500px] xl:min-h-0`}>
             <VideoShotsColumn
               product={activeProduct}
@@ -290,10 +348,30 @@ export default function App() {
         </div>
       </main>
 
-      <ProductModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleAddProduct} />
-      <ScriptExportModal isOpen={isExportScriptModalOpen} onClose={() => setIsExportScriptModalOpen(false)} product={activeProduct} selectedInsight={selectedInsightForShots} />
-      <BackupModal isOpen={isBackupModalOpen} onClose={() => setIsBackupModalOpen(false)} products={products} onRestoreProducts={handleRestoreProducts} />
-      <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+      <ProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleAddProduct}
+      />
+
+      <ScriptExportModal
+        isOpen={isExportScriptModalOpen}
+        onClose={() => setIsExportScriptModalOpen(false)}
+        product={activeProduct}
+        selectedInsight={selectedInsightForShots}
+      />
+
+      <BackupModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        products={products}
+        onRestoreProducts={handleRestoreProducts}
+      />
+
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+      />
     </div>
   );
 }
