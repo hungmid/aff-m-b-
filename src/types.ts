@@ -2,7 +2,8 @@ export type CategoryType =
   | 'mom-essentials'
   | 'baby-care'
   | 'baby-clothes'
-  | 'baby-toys';
+  | 'baby-toys'
+  | 'utility-items'; // <-- Thêm danh mục Đồ dùng tiện ích ở đây
 
 export interface CategoryMeta {
   id: CategoryType;
@@ -66,6 +67,18 @@ export const CATEGORIES: Record<CategoryType, CategoryMeta> = {
     badgeBg: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60',
     description: 'Gặm nướu silicon, xúc xắc, sách vải kích thích thị giác, xe tập đi...',
   },
+  'utility-items': {
+    id: 'utility-items',
+    name: 'Đồ dùng tiện ích',
+    shortName: 'Tiện ích',
+    iconName: 'Wrench',
+    color: 'indigo',
+    bgColor: 'bg-indigo-50/70 dark:bg-indigo-950/30',
+    borderColor: 'border-indigo-200/80 dark:border-indigo-900/50',
+    textColor: 'text-indigo-700 dark:text-indigo-300',
+    badgeBg: 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/60',
+    description: 'Các thiết bị, vật dụng thông minh và tiện ích hỗ trợ sinh hoạt...',
+  },
 };
 
 export interface CustomerInsight {
@@ -95,20 +108,16 @@ export interface Product {
   id: string;
   name: string;
   category: CategoryType;
-  price?: string; // Giá bán hiện tại
+  price?: string; 
   
-  // Shopee
   shopeeUrl?: string;
   shopeeCommission?: string;
   
-  // TikTok Shop
   tiktokUrl?: string;
   tiktokCommission?: string;
   
-  // Danh sách tối đa 5 ảnh (lưu dạng base64 / URL)
   images?: string[];
 
-  // Legacy fallback fields
   imageUrl?: string;
   affiliateUrl?: string;
   commissionRate?: string;
